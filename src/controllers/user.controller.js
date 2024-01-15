@@ -217,7 +217,7 @@ try {
     if(!oldPassword || !newPassword) {
       throw new ApiError(400, "old password and new password are required");
     }
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user?._id);
 
    const isPasswordValid =  await user.isPasswordCorrect(oldPassword);
     if(!isPasswordValid) {
@@ -251,7 +251,7 @@ export const currentUser = AsyncHandler(async(req, res)=>{
     if(!(username || fullName)) {
       throw new ApiError(400, "username or fullName  is required");
     }
-    const user = await User.findByIdAndUpdate(req.user._id, {
+    const user = await User.findByIdAndUpdate(req.user?._id, {
        
         $set: {
           username,
@@ -278,7 +278,7 @@ export const currentUser = AsyncHandler(async(req, res)=>{
       throw new ApiError(500, "Error while uploading on avatar");
     }
 
-    const user = await User.findByIdAndUpdate(req.user._id, {
+    const user = await User.findByIdAndUpdate(req.user?._id, {
        
         $set: {
           avatar: avatar.url,
@@ -306,7 +306,7 @@ export const currentUser = AsyncHandler(async(req, res)=>{
       throw new ApiError(500, "Error while uploading on avatar");
     }
 
-    const user = await User.findByIdAndUpdate(req.user._id, {
+    const user = await User.findByIdAndUpdate(req.user?._id, {
        
         $set: {
           coverImage: coverImage.url,
