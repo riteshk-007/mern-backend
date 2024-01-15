@@ -209,3 +209,59 @@ export const refreshAccessToken = AsyncHandler(async(req, res)=>{
  }
 
 })
+
+// chnage password
+export const changeCurrentPassword = AsyncHandler(async(req, res)=>{
+try {
+    const {oldPassword, newPassword} = req.body;
+    if(!oldPassword || !newPassword) {
+      throw new ApiError(400, "old password and new password are required");
+    }
+    const user = await User.findById(req.user._id);
+
+   const isPasswordValid =  await user.isPasswordCorrect(oldPassword);
+    if(!isPasswordValid) {
+      throw new ApiError(401, "password is incorrect");
+    }
+    user.password = newPassword;
+    await user.save({
+        validateBeforeSave: false,
+      } );
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "password changed successfully"));
+
+} catch (error) {
+  throw new ApiError(400, error?.message || "old password and new password are required");
+}
+})
+
+
+// update user profile
+export const currentUser = AsyncHandler(async(req, res)=>{
+    return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "current user fetched successfully"));
+  })
+
+ // update user profile 
+ export const updateProfile = AsyncHandler(async(req, res)=>{
+    const {username, fullName} = req.body;
+    if(!(username || fullName)) {
+      throw new ApiError(400, "username or fullName  is required");
+    }
+    const user = await User.findByIdAndUpdate(req.user._id, {
+       
+        $set: {
+          username,
+          fullName,
+        }
+    
+    }, {
+      new: true,
+    }).select("-password");
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user, "user profile updated successfully"));
+ })
