@@ -292,3 +292,31 @@ export const currentUser = AsyncHandler(async(req, res)=>{
     .status(200)
     .json(new ApiResponse(200, user, "user avatar updated successfully"));
  })
+
+
+  // update user cover image
+  export const updateCoverImage = AsyncHandler(async(req, res)=>{
+    const coverImageLocalPath = req.file?.path;
+    if (!coverImageLocalPath) {
+      throw new ApiError(400, "cover Image file is missing");
+    }
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+    if (!coverImage.url) {
+      throw new ApiError(500, "Error while uploading on avatar");
+    }
+
+    const user = await User.findByIdAndUpdate(req.user._id, {
+       
+        $set: {
+          coverImage: coverImage.url,
+        }
+    
+    }, {
+      new: true,
+    }).select("-password");
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user, "user cover image updated successfully"));
+ })
