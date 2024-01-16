@@ -320,3 +320,65 @@ export const currentUser = AsyncHandler(async(req, res)=>{
     .status(200)
     .json(new ApiResponse(200, user, "user cover image updated successfully"));
  })
+
+
+ export const getUserChannelProfile = AsyncHandler(async (req, res)=>{
+  const {username} = req.params;
+  if(!username?.trim()) {
+    throw new ApiError(400, "username is required");
+  }
+  const channel =  await User.aggregate([
+    {
+      $match:{
+        username: username?.toLowerCase(),
+      }
+    },{
+      $lookup:{
+        from: "Subscription",
+        localField: "_id",
+        foreignField:"channel",
+        as: "subscribers"
+      }
+    },{
+      $lookup:{
+        from: "Subscription",
+        localField: "_id",
+        foreignField:"subscriber",
+        as: "subscribedTo"
+      }
+    },{
+      $addFields:{
+        subscriberCount: {
+          $size: "$subscribers"
+        },
+        ChannelssubscribedToCount: {
+          $size: "$subscribedTo"
+        },
+        isSubscribed :{
+          $cont : {
+            if: {$in: [req.user?._id, "$subscribers.subscriber"]},
+            then: true,
+            else: false
+          }
+        }
+      }
+    },{
+      $project: {
+          fullName: 1,
+          username: 1,
+          isSubscribed: 1,
+          subscriberCount: 1,
+          ChannelssubscribedToCount: 1,
+          avatar: 1,
+          coverImage: 1,
+          email: 1,
+      }
+    }
+  ])
+  if(!channel?.length) {
+    throw new ApiError(404, "channel dose not exist");
+  }
+  return res
+  .status(200)
+  .json(new ApiResponse(200, channel[0], "channel fetched successfully"));
+ })
