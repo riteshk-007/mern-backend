@@ -4,6 +4,7 @@ import { User } from "../models/User.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 
 // generate access token and refresh token
@@ -321,7 +322,7 @@ export const currentUser = AsyncHandler(async(req, res)=>{
     .json(new ApiResponse(200, user, "user cover image updated successfully"));
  })
 
-
+// Create a new subscription for the specified channel
  export const getUserChannelProfile = AsyncHandler(async (req, res)=>{
   const {username} = req.params;
   if(!username?.trim()) {
@@ -381,4 +382,50 @@ export const currentUser = AsyncHandler(async(req, res)=>{
   return res
   .status(200)
   .json(new ApiResponse(200, channel[0], "channel fetched successfully"));
+ })
+
+ // get user watch history
+ export const GetWatchHistory = AsyncHandler(async (req, res)=>{
+    const user  = await User.aggregate([
+      {
+        $match:{
+          _id: new mongoose.Types.ObjectId(req.user?._id),
+        }
+      },{
+        $lookup:{ 
+          from : "Video",
+          localField:"watchHistory",
+          foreignField:"_id",
+          as: "watchHistory",
+          pipeline:[
+            {
+              $lookup:{
+                from: "User",
+                localField: "owner",
+                foreignField:"_id",
+                as: "owner",
+                pipeline:[
+                  {
+                    $project:{
+                      username: 1,
+                      fullName: 1,
+                      avatar: 1,
+                    }
+                  }
+                ]
+              }
+            },{
+              $addFields:{
+                owner : {
+                  $first : "$owner",
+                }
+              }
+            }
+          ]
+        }
+      }
+    ])
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user[0].watchHistory, "user watch history fetched successfully"));
  })
