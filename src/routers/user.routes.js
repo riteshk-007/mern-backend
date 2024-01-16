@@ -17,7 +17,7 @@ import { verifyToken } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-router.route("/register").post(
+router.route("/register").post( //   /register
   upload.fields([
     {
       name: "avatar",
@@ -31,20 +31,20 @@ router.route("/register").post(
   registerUser
 );
 
-router.route("/login").post(loginUser)
+router.route("/login").post(loginUser) //    /login
 
 
-router.route("/logout").post(verifyToken, logoutUser)
-router.route("/refresh-token").post(refreshAccessToken)
-router.route("/change-password").post(verifyToken, changeCurrentPassword)
-router.route('/current-user').get(verifyToken, currentUser)
-router.route("/update-account").patch(verifyToken, updateProfile)
+router.route("/logout").post(verifyToken, logoutUser) //    /logout
+router.route("/refresh-token").post(refreshAccessToken) //   /refresh-token
+router.route("/change-password").post(verifyToken, changeCurrentPassword) //     /change-password
+router.route('/current-user').get(verifyToken, currentUser) //    /current-user
+router.route("/update-account").patch(verifyToken, updateProfile) //    /update-account
 
-router.route("/update-avatar").patch(verifyToken, upload.single("avatar"), updateAvatar)
-router.route("/cover-image").patch(verifyToken, upload.single("coverImage"),updateCoverImage)
+router.route("/update-avatar").patch(verifyToken, upload.single("avatar"), updateAvatar) //    /update-avatar
+router.route("/cover-image").patch(verifyToken, upload.single("coverImage"),updateCoverImage) //    /cover-image
 
 router.route("/c/:username").get(verifyToken, getUserChannelProfile)
 
-router.route("/history").get(verifyToken, GetWatchHistory)
+router.route("/history").get(verifyToken, GetWatchHistory) //     /history
 
 export default router;
